@@ -15,7 +15,7 @@ class BuildRetriever():
         self.retriever = retriever
         self.llm = llm
 
-    def split_image_text_types(self, docs):
+    def get_text(self, docs):
         texts = []
         for doc in docs:
             if isinstance(doc, Document):
@@ -25,10 +25,7 @@ class BuildRetriever():
         return {"texts": texts}
 
 
-    def img_prompt_func(self, data_dict):
-        """
-        Join the context into a single string
-        """
+    def prompt_func(self, data_dict):
         formatted_texts = "\n".join(data_dict["context"]["texts"])
         messages = []
 
@@ -64,20 +61,14 @@ class BuildRetriever():
         return [HumanMessage(content=text_message_qwen)]
 
 
-    def multi_modal_rag_chain(self):
-        """
-        Multi-modal RAG chain
-        """
-
-        # Multi-modal LLM
-
-        # RAG pipeline
+    def rag_chain(self):
+        # RAG chain
         chain = (
             {
-                "context": self.retriever | RunnableLambda(self.split_image_text_types),
+                "context": self.retriever | RunnableLambda(self.get_text),
                 "question": RunnablePassthrough(),
             }
-            | RunnableLambda(self.img_prompt_func)
+            | RunnableLambda(self.prompt_func)
             | self.llm
             | StrOutputParser()
         )
