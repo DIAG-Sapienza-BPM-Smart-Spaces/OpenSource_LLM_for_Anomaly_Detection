@@ -19,8 +19,8 @@ import shutil
 model_name = "deepseek-r1:32b"
 # embedding_model_name = "nomic-embed-text"
 llm_text = OllamaLLM(model=model_name, temperature=0.0)
-llm_image = OllamaLLM(model=model_name, temperature=0.0) #max_tokens 1024
-llm_retriever = OllamaLLM(model=model_name, temperature=0.0) #max_tokens 1024
+llm_image = OllamaLLM(model=model_name, temperature=0.0) 
+llm_retriever = OllamaLLM(model=model_name, temperature=0.0) 
 embeddings = OllamaEmbeddings(model=model_name)
 
 content_path = f"{model_name}_content"
@@ -74,7 +74,7 @@ if retrieverFlag:
     else:
         print(f"⚠️ Directory {vectorstore_path} does not exist.")
 
-# The vectorstore to use to index the summaries
+
 vectorstore = Chroma(
     collection_name="mm_rag_cj_blog", embedding_function=embeddings, persist_directory=vectorstore_path
 )
@@ -87,13 +87,9 @@ else:
 
 if extractElementsFlag:
     extractElements = ExtractElements(fpath, fname, lang_chain_path)
-
-
-    # Get elements texts and tables
+    
     texts, tables = extractElements.extract_pdf_elements()
 
-
-    # Optional: Enforce a specific token size for texts
     text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=5120, chunk_overlap=512
     )
@@ -117,28 +113,8 @@ else:
     with open(f"{model_name}_content/tables.pkl","rb") as f:
         tables = pickle.load(f)
 
-    # text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
-    #     chunk_size=5120, chunk_overlap=512
-    # )
-    # joined_texts = " ".join(texts)
-    # texts = text_splitter.split_text(joined_texts)
     print("✅ Loaded elements")
 
-
-
-
-#textSummary = TextSummary(texts, tables, llm_text, False)
-
-
-# Get text, table summaries
-#text_summaries, table_summaries = textSummary.generate_text_summaries()
-
-
-# imageSummary = ImmageSummary(lang_chain_path, llm_image)
-# # Image summaries
-# img_base64_list, image_summaries = imageSummary.generate_img_summaries()
-# with open("image.json","w") as f:
-#     f.write(str(image_summaries))
 
 if retrieverFlag:
     docstore_path = f"{model_name}_content/docstore.pkl"
@@ -162,48 +138,8 @@ else:
 buildRetriever = BuildRetriever(multi_vector_retriever, llm_retriever)
 
 # Create RAG chain
-chain_multimodal_rag = buildRetriever.multi_modal_rag_chain()
+chain_multimodal_rag = buildRetriever.rag_chain()
 
-# # # Check retrieval
 query = "Tell me about Jackpost Mounting"
-docs = multi_vector_retriever.invoke(query, limit=4)
 
-# We get 4 docs
-print(len(docs))
-print(docs)
-
-# # # Check retrieval
-# # query = "What are the EV / NTM and NTM rev growth for MongoDB, Cloudflare, and Datadog?"
-# # docs = multi_vector_retriever.invoke(query, limit=6)
-
-# # # We get 4 docs
-# # len(docs)
-
-
-# # We get back relevant images
-# img0 = buildRetriever.plt_img_base64(docs[0])
-## img1 = buildRetriever.plt_img_base64(img_base64_list[0])
-# for img0 in docs:
-#     try:
-#         # Open the image using PIL
-#         image = Image.open(img0)
-
-#         # Display in Jupyter Notebook
-#         display(image)
-#         print(f"✅ Displayed Image from: {img0}")
-#     except Exception as e:
-#         print(f"❌ Error loading image {img0}: {e}")
-
-# # try:
-# #     # Open the image using PIL
-# #     image = Image.open(img1)
-
-# #     # Display in Jupyter Notebook
-# #     display(image)
-# #     print(f"✅ Displayed Image from: {img1}")
-# # except Exception as e:
-# #     print(f"❌ Error loading image {img1}: {e}")
-
-
-# Run RAG chain
 print(chain_multimodal_rag.invoke(query))
