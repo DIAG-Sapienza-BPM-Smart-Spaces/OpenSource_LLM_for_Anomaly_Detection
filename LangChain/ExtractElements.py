@@ -4,12 +4,11 @@ import os
 from itertools import groupby
 
 class ExtractElements():
-    # Extract elements from PDF
     def __init__(self, path, fname, lang_chain_path):
         self.path = path
         self.fname = fname
         self.lang_chain_path = lang_chain_path
-        self.page_images = {}  # Dictionary to store images per page
+        self.page_images = {}  
 
     def chunk_by_page(self, elements):
         def get_page_number(element):
@@ -19,11 +18,6 @@ class ExtractElements():
 
 
     def extract_pdf_elements(self):
-        """
-        Extract images, tables, and chunk text from a PDF file.
-        path: File path, which is used to dump images (.jpg)
-        fname: File name
-        """
         elements =  partition_pdf(
             filename=os.path.join(self.path, self.fname),
             strategy="hi_res",
@@ -39,7 +33,6 @@ class ExtractElements():
             extract_image_block_types=["Image"]
         )
 
-        # elements = self.chunk_by_page(elements)
         tables = []
         texts = []
 
@@ -53,9 +46,6 @@ class ExtractElements():
                 for elementInComposite in element.metadata.orig_elements:
                     if "unstructured.documents.elements.Image" in str(type(elementInComposite)):
                         count_images+=1
-                        # print(page_num)
-                        # print(temp_page_num)
-                        # print("images in page" + str(count_images_in_page))
                         figure_path = "figure-" + str(page_num) + "-" + str(count_images) + ".jpg"
                         if(new_element):
                             text_content+= "\n\n Images on this page:\n " + f"{self.lang_chain_path}" + figure_path
@@ -66,15 +56,4 @@ class ExtractElements():
             elif "unstructured.documents.elements.Table" in str(type(element)):
                 tables.append(str(element))
                 
-            # if isinstance(element, partition_pdf.__annotations__.get('Image', object)):
-            #     page_num = element.metadata.page_number 
-            #     image_name = element.metadata
-            #     print(element.metadata)
-            #     image_path = os.path.join(self.lang_chain_path, image_name)
-                
-            #     if page_num is not None:
-            #         if page_num not in self.page_images:
-            #             self.page_images[page_num] = []
-            #         self.page_images[page_num].append(image_path)
-
         return texts, tables
