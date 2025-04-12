@@ -1,0 +1,13 @@
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.36.0
+accelerate>=0.21.0
+chromadb>=0.4.6
+PyPDF2>=3.0.0
+pillow>=9.4.0
+argparse>=1.4.0
+bitsandbytes>=0.41.0
+sentencepiece>=0.1.99
+regex>=2022.10.31
+safetensors>=0.3.1
+einops>=0.6.1
